@@ -1,3 +1,5 @@
+package store;
+
 import java.math.BigDecimal;
 
 public class Book {
@@ -50,6 +52,6 @@ public class Book {
 
     @Override
     public String toString() {
-        return "ID: " + id + "Title: " + title + ", Author: " + author + ", Price: " + price;
+        return "ID: " + id + ", Title: " + title + ", Author: " + author + ", Price: " + price;
     }
 }

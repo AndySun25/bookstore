@@ -1,4 +1,5 @@
-import java.io.File;
+package store;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -39,18 +40,6 @@ public class Store implements BookList {
         getBooksFromUrl(source_url);
     }
 
-    public Store(File file) {
-        /**
-         * Initialize and populate from file.
-         */
-
-        books = new HashMap<>();
-        book_stock = new HashMap<>();
-        title_index = new HashMap<>();
-        author_index = new HashMap<>();
-        getBooksFromFile(file);
-    }
-
     public void getBooksFromUrl(String source_url){
         /**
          * Populates list of books from url.
@@ -87,10 +76,6 @@ public class Store implements BookList {
         }
     }
 
-    public void getBooksFromFile(File file) {
-
-    }
-
     public Book[] list() {
         Collection<Book> ret = books.values();
         return ret.toArray(new Book[ret.size()]);
@@ -121,7 +106,29 @@ public class Store implements BookList {
 
     @Override
     public boolean add(Book book, int amount) {
-        if (books.containsKey(book.getId())) {
+        /**
+         * Add new book to store or add stock to existing book.
+         */
+        boolean exists = false;
+        // Check if book exists.
+        if (author_index.containsKey(book.getAuthor()) && title_index.containsKey(book.getTitle())) {
+
+            // Create copy of list as to not overwrite index entry.
+            List<Integer> intersect = new ArrayList<>(author_index.get(book.getAuthor()));
+            intersect.retainAll(title_index.get(book.getTitle()));
+
+            if (intersect.size()==1) {
+                // If book with same title and same author but different price exists, return false.
+                if (books.get(intersect.get(0)).getPrice() != book.getPrice()) {
+                    return false;
+                } else {
+                    exists = true;
+                }
+            }
+        }
+
+        // If book exists, add to stock, otherwise add new book.
+        if (exists) {
             int new_stock = book_stock.get(book.getId()) + amount;
             book_stock.put(book.getId(), new_stock);
         } else {
@@ -131,7 +138,7 @@ public class Store implements BookList {
             AddToIndices(book);
             id++;
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -151,7 +158,7 @@ public class Store implements BookList {
 
                 // If book has sufficient stock
                 if (cur_stock >= 1) {
-                    int new_stock = cur_stock--;
+                    int new_stock = cur_stock - 1;
                     book_stock.put(cur_id, new_stock);
                     ret[i] = 0;
                 } else {
@@ -160,7 +167,9 @@ public class Store implements BookList {
             } else {
                 ret[i] = 2;
             }
+            System.out.print(ret[i] + ", ");
         }
+        System.out.println();
 
         return ret;
     }
