@@ -56,6 +56,7 @@ public class StoreFront {
         frm_main.add(pnl_main);
         frm_main.pack();
         frm_main.setVisible(true);
+        frm_main.setExtendedState(frm_main.getExtendedState() | JFrame.MAXIMIZED_BOTH);
     }
 
     private void populateResults(Book[] books) {
