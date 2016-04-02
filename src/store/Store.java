@@ -15,7 +15,7 @@ public class Store implements BookList {
     // All books
     private HashMap<Integer, Book> books;
 
-    // Book indices
+    // Book indices - Title and author indices are case insensitive.
     private HashMap<Integer, Integer> book_stock;
     private HashMap<String, Set<Integer>> title_index;
     private HashMap<String, Set<Integer>> author_index;
@@ -95,6 +95,9 @@ public class Store implements BookList {
         /**
          * List books with JSON search parameters.
          */
+        if (searchString.length()==0) {
+            return list();
+        }
         try {
             Object queryobj = queryparser.parse(searchString);
             JSONObject query = (JSONObject) queryobj;
@@ -108,13 +111,13 @@ public class Store implements BookList {
             if (title==null || title.length()==0) {
                 aggregated_matches.addAll(books.keySet());
             } else {
-                aggregated_matches.addAll(title_index.get(title));
+                aggregated_matches.addAll(title_index.get(title.toLowerCase()));
             }
 
             if (author==null || author.length()==0) {
                 aggregated_matches.retainAll(books.keySet());
             } else {
-                aggregated_matches.retainAll(author_index.get(author));
+                aggregated_matches.retainAll(author_index.get(author.toLowerCase()));
             }
 
             Book[] ret = new Book[aggregated_matches.size()];
@@ -144,12 +147,12 @@ public class Store implements BookList {
             List<Integer> intersect = new ArrayList<>(author_index.get(book.getAuthor()));
             intersect.retainAll(title_index.get(book.getTitle()));
 
-            if (intersect.size()==1) {
-                // If book with same title and same author but different price exists, return false.
-                if (!books.get(intersect.get(0)).getPrice().equals(book.getPrice())) {
-                    return false;
-                } else {
-                    exists = true;
+            if (intersect.size()>=1) {
+                for (int id: intersect) {
+                    if (books.get(id).getPrice().equals(book.getPrice())) {
+                        exists = true;
+                        break;
+                    }
                 }
             }
         }
@@ -205,8 +208,8 @@ public class Store implements BookList {
          * Adds book title and author to their respective indices.
          */
         int id = book.getId();
-        String title = book.getTitle();
-        String author = book.getAuthor();
+        String title = book.getTitle().toLowerCase();
+        String author = book.getAuthor().toLowerCase();
 
         // Update title index
         if (title_index.containsKey(title)) {
