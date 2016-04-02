@@ -26,12 +26,18 @@ public class StoreTest extends TestCase {
     }
 
     public void testListAll() {
+        /**
+         * Test listing all books.
+         */
         Book[] expectedResult = {book1, book2, book3};
-        Book[] result = store.list();
+        Book[] result = store.list("");
         Assert.assertArrayEquals(expectedResult, result);
     }
 
     public void testListTitle() {
+        /**
+         * Test listing books by title search.
+         */
         Book[] expectedResult = {book2, book3};
         JSONObject query = new JSONObject();
         query.put("title", book2.getTitle());
@@ -39,7 +45,21 @@ public class StoreTest extends TestCase {
         Assert.assertArrayEquals(expectedResult, result);
     }
 
+    public void testListTitleCaseInsensitive() {
+        /**
+         * Test listing books by title search can be done case insensitively.
+         */
+        Book[] expectedResult = {book2, book3};
+        JSONObject query = new JSONObject();
+        query.put("title", book2.getTitle().toUpperCase());
+        Book[] result = store.list(query.toJSONString());
+        Assert.assertArrayEquals(expectedResult, result);
+    }
+
     public void testListAuthor() {
+        /**
+         * Test listing books by author search.
+         */
         Book[] expectedResult = {book1, book3};
         JSONObject query = new JSONObject();
         query.put("author", book1.getAuthor());
@@ -47,7 +67,21 @@ public class StoreTest extends TestCase {
         Assert.assertArrayEquals(expectedResult, result);
     }
 
+    public void testListAuthorCaseInsensitive() {
+        /**
+         * Test listing books by author search can be done case insensitively.
+         */
+        Book[] expectedResult = {book1, book3};
+        JSONObject query = new JSONObject();
+        query.put("author", book1.getAuthor().toUpperCase());
+        Book[] result = store.list(query.toJSONString());
+        Assert.assertArrayEquals(expectedResult, result);
+    }
+
     public void testAddBook() {
+        /**
+         * Test adding new book.
+         */
         int initial_length = store.list().length;
 
         Book newBook = new Book("new_title", "new_author", new BigDecimal(25.0));
@@ -58,6 +92,9 @@ public class StoreTest extends TestCase {
     }
 
     public void testBuyBook() {
+        /**
+         * Test buying books.
+         */
         Book non_existent_book = new Book("title", "author", new BigDecimal(4.0));
         int[] expected_result = {0, 0, 1, 2};
         int[] result = store.buy(book1, book2, book3, non_existent_book);
