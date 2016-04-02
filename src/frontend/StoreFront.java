@@ -58,21 +58,21 @@ public class StoreFront {
         frm_main.setVisible(true);
     }
 
-    public void populateResults(Book[] books) {
+    private void populateResults(Book[] books) {
         lst_result.setListData(books);
     }
 
-    public void addToCart(Book book) {
+    private void addToCart(Book book) {
         cart.add(book);
         refreshCart();
     }
 
-    public void removeFromCart(Book book) {
+    private void removeFromCart(Book book) {
         cart.remove(book);
         refreshCart();
     }
 
-    public void buy() {
+    private void buy() {
         /**
          * Buy books and show results in dialog.
          */
@@ -101,7 +101,7 @@ public class StoreFront {
         refreshCart();
     }
 
-    public void refreshCart() {
+    private void refreshCart() {
         lst_cart.setListData(cart.toArray(new Book[cart.size()]));
 
         BigDecimal total = new BigDecimal(0);
@@ -111,7 +111,7 @@ public class StoreFront {
         lbl_total.setText("Total: " + total.toString());
     }
 
-    public class searchListener implements ActionListener{
+    private class searchListener implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             String title = txt_title.getText();
@@ -131,7 +131,7 @@ public class StoreFront {
         }
     }
 
-    public class addListener implements ActionListener {
+    private class addListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             if (!lst_result.isSelectionEmpty()) {
@@ -141,7 +141,7 @@ public class StoreFront {
         }
     }
 
-    public class removeListener implements ActionListener {
+    private class removeListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             if (!lst_cart.isSelectionEmpty()) {
@@ -151,7 +151,7 @@ public class StoreFront {
         }
     }
 
-    public class buyListener implements ActionListener {
+    private class buyListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             if (cart.size() > 0) {

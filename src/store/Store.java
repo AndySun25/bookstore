@@ -46,7 +46,7 @@ public class Store implements BookList {
         getBooksFromUrl(source_url);
     }
 
-    public void getBooksFromUrl(String source_url){
+    private void getBooksFromUrl(String source_url){
         /**
          * Populates list of books from url.
          */
@@ -83,12 +83,18 @@ public class Store implements BookList {
     }
 
     public Book[] list() {
+        /**
+         * List all books.
+         */
         Collection<Book> ret = books.values();
         return ret.toArray(new Book[ret.size()]);
     }
 
     @Override
     public Book[] list(String searchString) {
+        /**
+         * List books with JSON search parameters.
+         */
         try {
             Object queryobj = queryparser.parse(searchString);
             JSONObject query = (JSONObject) queryobj;
@@ -98,6 +104,7 @@ public class Store implements BookList {
 
             Set<Integer> aggregated_matches = new HashSet<>();
 
+            // Find intersection between title and author filtering, use all books for either field if no value is provided.
             if (title==null || title.length()==0) {
                 aggregated_matches.addAll(books.keySet());
             } else {
@@ -193,7 +200,7 @@ public class Store implements BookList {
         return ret;
     }
 
-    public void AddToIndices(Book book) {
+    private void AddToIndices(Book book) {
         /***
          * Adds book title and author to their respective indices.
          */
