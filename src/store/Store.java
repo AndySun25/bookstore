@@ -1,11 +1,14 @@
 package store;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.util.*;
 
 public class Store implements BookList {
@@ -14,11 +17,14 @@ public class Store implements BookList {
 
     // Book indices
     private HashMap<Integer, Integer> book_stock;
-    private HashMap<String, List<Integer>> title_index;
-    private HashMap<String, List<Integer>> author_index;
+    private HashMap<String, Set<Integer>> title_index;
+    private HashMap<String, Set<Integer>> author_index;
 
     // Unique id
     private int id = 1;
+
+    // JSON parser for querystring parsing
+    private static JSONParser queryparser = new JSONParser();
 
 
     public Store() {
@@ -62,7 +68,7 @@ public class Store implements BookList {
                     book.setId(id);
 
                     add(book, stock);
-                } catch (ParseException e) {
+                } catch (java.text.ParseException e) {
                     System.err.println("Error in parsing record");
                 }
             }
@@ -83,25 +89,39 @@ public class Store implements BookList {
 
     @Override
     public Book[] list(String searchString) {
-        List<Integer> title_matches = title_index.get(searchString);
-        List<Integer> author_matches = author_index.get(searchString);
+        try {
+            Object queryobj = queryparser.parse(searchString);
+            JSONObject query = (JSONObject) queryobj;
 
-        Set<Integer> aggregated = new HashSet<>();
-        if (title_matches != null) {
-            aggregated.addAll(title_matches);
+            String title = (String) query.get("title");
+            String author = (String) query.get("author");
+
+            Set<Integer> aggregated_matches = new HashSet<>();
+
+            if (title==null || title.length()==0) {
+                aggregated_matches.addAll(books.keySet());
+            } else {
+                aggregated_matches.addAll(title_index.get(title));
+            }
+
+            if (author==null || author.length()==0) {
+                aggregated_matches.retainAll(books.keySet());
+            } else {
+                aggregated_matches.retainAll(author_index.get(author));
+            }
+
+            Book[] ret = new Book[aggregated_matches.size()];
+
+            int counter = 0;
+            for (int id : aggregated_matches) {
+                ret[counter++] = books.get(id);
+            }
+
+            return ret;
+        } catch (ParseException e){
+            System.err.println("Malformed JSON querystring");
+            return new Book[0];
         }
-        if (author_matches != null) {
-            aggregated.addAll(author_matches);
-        }
-
-        Book[] ret = new Book[aggregated.size()];
-
-        int counter = 0;
-        for (int id : aggregated) {
-            ret[counter++] = books.get(id);
-        }
-
-        return ret;
     }
 
     @Override
@@ -119,7 +139,7 @@ public class Store implements BookList {
 
             if (intersect.size()==1) {
                 // If book with same title and same author but different price exists, return false.
-                if (books.get(intersect.get(0)).getPrice() != book.getPrice()) {
+                if (!books.get(intersect.get(0)).getPrice().equals(book.getPrice())) {
                     return false;
                 } else {
                     exists = true;
@@ -167,7 +187,6 @@ public class Store implements BookList {
             } else {
                 ret[i] = 2;
             }
-            System.out.print(ret[i] + ", ");
         }
         System.out.println();
 
@@ -186,7 +205,7 @@ public class Store implements BookList {
         if (title_index.containsKey(title)) {
             title_index.get(title).add(id);
         } else {
-            List<Integer> val = new ArrayList<>();
+            HashSet<Integer> val = new HashSet<>();
             val.add(id);
             title_index.put(title, val);
         }
@@ -195,7 +214,7 @@ public class Store implements BookList {
         if (author_index.containsKey(author)) {
             author_index.get(author).add(id);
         } else {
-            List<Integer> val = new ArrayList<>();
+            HashSet<Integer> val = new HashSet<>();
             val.add(id);
             author_index.put(author, val);
         }

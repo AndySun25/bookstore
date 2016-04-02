@@ -1,6 +1,7 @@
 package test;
 
 import junit.framework.*;
+import org.json.simple.JSONObject;
 import org.junit.Assert;
 import store.Book;
 import store.Store;
@@ -32,13 +33,17 @@ public class StoreTest extends TestCase {
 
     public void testListTitle() {
         Book[] expectedResult = {book2, book3};
-        Book[] result = store.list(book2.getTitle());
+        JSONObject query = new JSONObject();
+        query.put("title", book2.getTitle());
+        Book[] result = store.list(query.toJSONString());
         Assert.assertArrayEquals(expectedResult, result);
     }
 
     public void testListAuthor() {
         Book[] expectedResult = {book1, book3};
-        Book[] result = store.list(book1.getAuthor());
+        JSONObject query = new JSONObject();
+        query.put("author", book1.getAuthor());
+        Book[] result = store.list(query.toJSONString());
         Assert.assertArrayEquals(expectedResult, result);
     }
 
