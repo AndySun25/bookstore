@@ -31,6 +31,7 @@ public class StoreFront {
     private JLabel lbl_Title;
     private JLabel lbl_author;
     private JLabel lbl_title;
+    private JCheckBox chk_partial;
     private static Dimension def = new Dimension(600, 400);
 
     private static String buy_success = "Purchased";
@@ -120,11 +121,12 @@ public class StoreFront {
             Book[] results;
 
             if (title.length() == 0 && author.length() == 0) {
-                results = store.list();
+                results = store.list("");
             } else {
                 JSONObject query = new JSONObject();
                 query.put("title", txt_title.getText());
                 query.put("author", txt_author.getText());
+                query.put("partial", !chk_partial.isSelected());
                 results = store.list(query.toJSONString());
             }
 

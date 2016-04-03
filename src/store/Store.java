@@ -104,6 +104,12 @@ public class Store implements BookList {
 
             String title = (String) query.get("title");
             String author = (String) query.get("author");
+            Boolean partial = (Boolean) query.get("partial");
+
+            // Partial defaults to true if not provided.
+            if (partial==null) {
+                partial = true;
+            }
 
             Set<Integer> aggregated_matches = new HashSet<>();
 
@@ -111,13 +117,42 @@ public class Store implements BookList {
             if (title==null || title.length()==0) {
                 aggregated_matches.addAll(books.keySet());
             } else {
-                aggregated_matches.addAll(title_index.get(title.toLowerCase()));
+                // If partial match is requested, do full search through all books. Otherwise use indices.
+                if (partial) {
+                    Set<Integer> match_keys = new HashSet<>();
+                    for (int key: books.keySet()) {
+                        if (books.get(key).getTitle().toLowerCase().contains(title.toLowerCase())) {
+                            match_keys.add(key);
+                        }
+                    }
+                    aggregated_matches.addAll(match_keys);
+                } else {
+                    Set<Integer> match_keys = title_index.get(title.toLowerCase());
+                    if (match_keys!=null) {
+                        aggregated_matches.addAll(match_keys);
+                    }
+                }
             }
 
             if (author==null || author.length()==0) {
                 aggregated_matches.retainAll(books.keySet());
             } else {
-                aggregated_matches.retainAll(author_index.get(author.toLowerCase()));
+                if (partial) {
+                    Set<Integer> match_keys = new HashSet<>();
+                    for (int key: books.keySet()) {
+                        if (books.get(key).getAuthor().toLowerCase().contains(author.toLowerCase())) {
+                            match_keys.add(key);
+                        }
+                    }
+                    aggregated_matches.retainAll(match_keys);
+                } else {
+                    Set<Integer> match_keys = author_index.get(author.toLowerCase());
+                    if (match_keys!=null) {
+                        aggregated_matches.retainAll(match_keys);
+                    } else {
+                        aggregated_matches.clear();
+                    }
+                }
             }
 
             Book[] ret = new Book[aggregated_matches.size()];
@@ -128,7 +163,7 @@ public class Store implements BookList {
             }
 
             return ret;
-        } catch (ParseException e){
+        } catch (ParseException e) {
             System.err.println("Malformed JSON querystring");
             return new Book[0];
         }
