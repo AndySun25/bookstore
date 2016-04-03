@@ -41,6 +41,7 @@ public class StoreTest extends TestCase {
         Book[] expectedResult = {book2, book3};
         JSONObject query = new JSONObject();
         query.put("title", book2.getTitle());
+        query.put("partial", false);
         Book[] result = store.list(query.toJSONString());
         Assert.assertArrayEquals(expectedResult, result);
     }
@@ -52,6 +53,19 @@ public class StoreTest extends TestCase {
         Book[] expectedResult = {book2, book3};
         JSONObject query = new JSONObject();
         query.put("title", book2.getTitle().toUpperCase());
+        query.put("partial", false);
+        Book[] result = store.list(query.toJSONString());
+        Assert.assertArrayEquals(expectedResult, result);
+    }
+
+    public void testListTitlePartial() {
+        /**
+         * Test listing books by title search.
+         */
+        Book[] expectedResult = {book2, book3};
+        JSONObject query = new JSONObject();
+        query.put("title", "_2");
+        query.put("partial", true);
         Book[] result = store.list(query.toJSONString());
         Assert.assertArrayEquals(expectedResult, result);
     }
@@ -63,6 +77,7 @@ public class StoreTest extends TestCase {
         Book[] expectedResult = {book1, book3};
         JSONObject query = new JSONObject();
         query.put("author", book1.getAuthor());
+        query.put("partial", false);
         Book[] result = store.list(query.toJSONString());
         Assert.assertArrayEquals(expectedResult, result);
     }
@@ -74,6 +89,19 @@ public class StoreTest extends TestCase {
         Book[] expectedResult = {book1, book3};
         JSONObject query = new JSONObject();
         query.put("author", book1.getAuthor().toUpperCase());
+        query.put("partial", false);
+        Book[] result = store.list(query.toJSONString());
+        Assert.assertArrayEquals(expectedResult, result);
+    }
+
+    public void testListAuthorPartial() {
+        /**
+         * Test listing books by author search.
+         */
+        Book[] expectedResult = {book1, book3};
+        JSONObject query = new JSONObject();
+        query.put("author", "_1");
+        query.put("partial", true);
         Book[] result = store.list(query.toJSONString());
         Assert.assertArrayEquals(expectedResult, result);
     }
